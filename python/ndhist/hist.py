@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import copy
 
 # __________________________________________________________________________
 # Hist class from ndhist
@@ -21,6 +22,19 @@ class Hist:
         axes = ' vs '.join([x.name for x in self.axes])
         return 'Histogram[{}]'.format(axes)
 
+    # various convenience add operators
+    def __add__(self, other):
+        out = copy.deepcopy(self)
+        out += other
+        return out
+    def __radd__(self, other):
+        if other == 0: # check for sum()
+            return self
+        return self + other
+    def __iadd__(self, other):
+        self.hist += other.hist
+        return self
+
 def get_axes(ds):
     """returns a list of axes from a Dataset produced via ndhist"""
     axes_ar = ds.attrs['axes']
@@ -36,7 +50,13 @@ class Axis:
         self.name = array[prop_list.index('name')]
         self.lims = [array[prop_list.index(x)] for x in ['min', 'max']]
         self.units = array[prop_list.index('units')]
+        self._nbins = array[prop_list.index('n_bins')]
     def __str__(self):
         prints = [self.name] + list(self.lims) + [self.units]
         return 'name: {}, range: {}-{}, units {}'.format(
             *(str(x) for x in prints))
+    # def as_np(self):
+    #     dtype = np.dtype([
+    #         ('name', 'U'), ('n_bins', '<i4'), ('min', '<f8'), ('max', '<f8'),
+    #         ('units', 'U')])
+    #     ls =                    # work in progress

@@ -13,6 +13,8 @@ class Hist:
         self.hist = np.asarray(base)
         try:
             self.axes = get_axes(base)
+            # save the dtype for later use
+            self._ax_dtype = _get_axes_type(base)
         except KeyError as err:
             raise OSError("{} doesn't seem to be a histogram".format(
                 str(base)))
@@ -35,6 +37,16 @@ class Hist:
         self.hist += other.hist
         return self
 
+    # for saving
+    def _axes_as_numpy(self):
+        tuples = [ax.as_tuple(self._ax_dtype.names) for ax in self.axes]
+        return np.array(tuples, dtype=self._ax_dtype)
+    def write(self, group, name):
+        ds = group.create_dataset(name, data=self.hist)
+        ds.attrs['axes'] = self._axes_as_numpy()
+        pass
+
+
 def get_axes(ds):
     """returns a list of axes from a Dataset produced via ndhist"""
     axes_ar = ds.attrs['axes']
@@ -44,6 +56,9 @@ def get_axes(ds):
         the_ax = Axis(ax_props, ax)
         axes.append(the_ax)
     return axes
+
+def _get_axes_type(ds):
+    return ds.attrs['axes'].dtype
 
 class Axis:
     def __init__(self, prop_list, array):
@@ -55,8 +70,11 @@ class Axis:
         prints = [self.name] + list(self.lims) + [self.units]
         return 'name: {}, range: {}-{}, units {}'.format(
             *(str(x) for x in prints))
-    # def as_np(self):
-    #     dtype = np.dtype([
-    #         ('name', 'U'), ('n_bins', '<i4'), ('min', '<f8'), ('max', '<f8'),
-    #         ('units', 'U')])
-    #     ls =                    # work in progress
+    def as_tuple(self, names):
+        """Return a tuple organized by names. Mostly for serialization."""
+        store = {'name': self.name, 'n_bins': self._nbins,
+                 'min': self.lims[0], 'max': self.lims[1],
+                 'units': self.units}
+        return tuple([store[name] for name in names])
+
+

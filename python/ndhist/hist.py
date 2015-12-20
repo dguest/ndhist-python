@@ -10,14 +10,15 @@ def is_h5_hist(base):
 class Hist:
     """very simple wrapper for histogram info"""
     def __init__(self, base):
+        if not is_h5_hist(base):
+            raise HistError(_hist_error_msg(str(base)))
         self.hist = np.asarray(base)
         try:
             self.axes = get_axes(base)
             # save the dtype for later use
             self._ax_dtype = _get_axes_type(base)
         except KeyError as err:
-            raise OSError("{} doesn't seem to be a histogram".format(
-                str(base)))
+            raise HistError(_hist_error_msg(str(base)))
     def __str__(self):
         return '{}-dim hist'.format(len(self.axes))
     def __repr__(self):
@@ -77,4 +78,12 @@ class Axis:
                  'units': self.units}
         return tuple([store[name] for name in names])
 
+# __________________________________________________________________________
+# exception handling
+
+class HistError(Exception):
+    pass
+
+def _hist_error_msg(name):
+    return "{} doesn't seem to be a histogram".format(name)
 

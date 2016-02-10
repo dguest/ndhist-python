@@ -75,7 +75,7 @@ def draw2d(can, hist, log=False, **kwargs):
     ax.set_xlabel(_ax_name(axes[0]), x=0.98, ha='right', size=_ax_size)
     ax.set_ylabel(_ax_name(axes[1]), y=0.98, ha='right', size=_ax_size)
 
-def draw1d(can, hists, ylabel='entries', log=False):
+def draw1d(can, hists, xlabel=None, ylabel='entries', log=False):
     """
     Draw a list of 1d histograms on canvas `can`.
 
@@ -86,7 +86,7 @@ def draw1d(can, hists, ylabel='entries', log=False):
      - norm: multiply by this
     """
     draw_opts = dict(drawstyle='steps-post')
-    xax = hists[0].axes[0]
+    xax = xlabel or hists[0].axes[0]
     for hist in hists:
         assert len(hist.axes) == 1, "only works for 1d hists (for now)"
         assert np.all(np.isclose(xax.lims, hist.axes[0].lims))

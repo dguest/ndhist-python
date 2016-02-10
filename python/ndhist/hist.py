@@ -2,6 +2,8 @@ import numpy as np
 import math
 import copy
 
+# TODO: make sure histogram attributes are properly added
+
 # __________________________________________________________________________
 # Hist class from ndhist
 def is_h5_hist(base):

@@ -23,6 +23,8 @@ def add_path():
         for line in pfile:
             if line.strip() == usr_path:
                 return
+        if not line.endswith('\n'):
+            pfile.write('\n')
         pfile.write(here_path() + '\n')
 
 def rm_path():

@@ -18,12 +18,15 @@ def add_path():
     usr_path = here_path()
     if not isdir(pth_file_dir):
         os.makedirs(pth_file_dir)
+
+    file_has_lines = False
     with open(join(pth_file_dir,pth_file),'a+') as pfile:
         pfile.seek(0)
         for line in pfile:
+            file_has_lines = True
             if line.strip() == usr_path:
                 return
-        if not line.endswith('\n'):
+        if file_has_lines and not line.endswith('\n'):
             pfile.write('\n')
         pfile.write(here_path() + '\n')
 
